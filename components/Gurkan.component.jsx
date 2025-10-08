@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 const GurkanComponent = () => {
   return (
@@ -9,4 +10,5 @@ const GurkanComponent = () => {
 };
 
 export default GurkanComponent;
+
 
