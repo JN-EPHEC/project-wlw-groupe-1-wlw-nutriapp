@@ -1,1 +1,1 @@
-code log("Gurkan a bien fait");
+console.log("Gurkan a bien fait");
