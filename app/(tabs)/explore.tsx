@@ -1,112 +1,193 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '@/src/contexts/AuthContext';
+import BackButton from '@/src/components/BackButton';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function AccountScreen() {
+  const router = useRouter();
+  const { isLoggedIn, logout, forceLogin } = useAuth();
 
-export default function TabTwoScreen() {
+  const handleLogin = () => {
+    router.push('/login');
+  };
+
+  const handleLogout = () => {
+    logout();
+    Alert.alert('Déconnexion', 'Vous avez été déconnecté.', [
+      { text: 'OK', onPress: () => router.push('/') },
+    ]);
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <BackButton />
+        <View style={styles.content}>
+          <Text style={styles.title}>Mon Compte</Text>
+          <Text style={styles.subtitle}>Connectez-vous pour accéder à votre compte</Text>
+          
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
+            <Text style={styles.loginButtonText}>Se connecter</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <BackButton />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Mon Compte</Text>
+          <Text style={styles.subtitle}>Gérez vos paramètres et préférences</Text>
+        </View>
+
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(tabs)/profile')}>
+            <Text style={styles.menuItemText}>👤 Mon profil</Text>
+            <Text style={styles.menuItemArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(tabs)/health')}>
+            <Text style={styles.menuItemText}>📊 Mes données de santé</Text>
+            <Text style={styles.menuItemArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Alert.alert('À venir', 'Cette fonctionnalité sera disponible prochainement.');
+            }}
+          >
+            <Text style={styles.menuItemText}>🔔 Notifications</Text>
+            <Text style={styles.menuItemArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Alert.alert('À venir', 'Cette fonctionnalité sera disponible prochainement.');
+            }}
+          >
+            <Text style={styles.menuItemText}>🔒 Confidentialité</Text>
+            <Text style={styles.menuItemArrow}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+          <Text style={styles.logoutButtonText}>Se déconnecter</Text>
+        </TouchableOpacity>
+
+        {/* Bouton temporaire pour forcer la connexion si déconnecté */}
+        {!isLoggedIn && (
+          <TouchableOpacity 
+            style={styles.forceLoginButton} 
+            onPress={() => {
+              forceLogin();
+              Alert.alert('Connexion forcée', 'Vous êtes maintenant connecté (mode test).');
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.forceLoginButtonText}>🔧 TEMPORAIRE: Forcer la connexion</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
   },
-  titleContainer: {
+  scrollContent: {
+    padding: 20,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: '#1A1A1A',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#6A6A6A',
+    lineHeight: 20,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  menuItem: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1A1A1A',
+  },
+  menuItemArrow: {
+    fontSize: 24,
+    color: '#6A6A6A',
+  },
+  loginButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 999,
+    minWidth: 200,
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    backgroundColor: '#F5F5F5',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  logoutButtonText: {
+    color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  forceLoginButton: {
+    marginTop: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FF5252',
+  },
+  forceLoginButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
