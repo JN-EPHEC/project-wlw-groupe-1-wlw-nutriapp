@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { signUpWithEmail, signInWithGoogle } from '@/src/services/authService';
@@ -10,6 +10,7 @@ import BackButton from '@/src/components/BackButton';
 
 export default function SignupScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +19,28 @@ export default function SignupScreen() {
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Gérer les erreurs de callback OAuth
+  useEffect(() => {
+    if (params.error) {
+      const errorMsg = decodeURIComponent(params.error as string);
+      let message = 'Erreur lors de l\'authentification Google.';
+      
+      if (errorMsg === 'no_token') {
+        message = 'Aucun token reçu de Google. Veuillez réessayer.';
+      } else if (errorMsg === 'state_mismatch') {
+        message = 'Erreur de sécurité. Veuillez réessayer.';
+      } else if (errorMsg.includes('firebase')) {
+        message = `Erreur Firebase: ${errorMsg}`;
+      } else if (errorMsg !== 'unknown_error') {
+        message = errorMsg;
+      }
+      
+      Alert.alert('Erreur d\'authentification', message);
+      // Nettoyer l'URL
+      router.replace('/signup');
+    }
+  }, [params.error]);
 
   const validateEmail = (mail: string) => {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\\.,;:\s@\"]+\.)+[^<>()[\]\\.,;:\s@\"]{2,})$/i;
@@ -64,14 +87,20 @@ export default function SignupScreen() {
   };
 
   const handleGoogleSignup = async () => {
+    console.log('🔵 handleGoogleSignup appelé');
     setGoogleLoading(true);
     try {
+      console.log('🔵 Appel de signInWithGoogleAsync...');
       const googleResult = await signInWithGoogleAsync();
+      console.log('🔵 Résultat Google:', googleResult);
       
       if (googleResult.success) {
+        console.log('🔵 Google auth réussie, connexion Firebase...');
         const firebaseResult = await signInWithGoogle(googleResult.idToken);
+        console.log('🔵 Résultat Firebase:', firebaseResult);
         
         if (firebaseResult.success) {
+          console.log('🔵 Connexion réussie, redirection...');
           login({
             uid: firebaseResult.user.uid,
             email: firebaseResult.user.email,
@@ -80,13 +109,19 @@ export default function SignupScreen() {
           });
           router.replace('/(tabs)');
         } else {
+          console.error('❌ Erreur Firebase:', firebaseResult.error);
           Alert.alert('Erreur', firebaseResult.error || 'Erreur de connexion Google');
         }
       } else {
+        console.error('❌ Erreur Google:', googleResult.error);
         Alert.alert('Erreur', googleResult.error || 'Connexion Google annulée');
       }
     } catch (error) {
-      Alert.alert('Erreur', error.message || 'Erreur lors de la connexion Google');
+      console.error('❌ Exception dans handleGoogleSignup:', error);
+      console.error('❌ Stack trace:', error?.stack);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      const errorMessage = error?.message || error?.toString() || 'Erreur inconnue lors de la connexion Google';
+      Alert.alert('Erreur', `Erreur: ${errorMessage}\n\nVérifiez la console pour plus de détails.`);
     } finally {
       setGoogleLoading(false);
     }
@@ -169,18 +204,21 @@ export default function SignupScreen() {
 
           <TouchableOpacity 
             style={[styles.googleButton, googleLoading && styles.buttonDisabled]} 
-            onPress={handleGoogleSignup}
+            onPress={() => {
+              console.log('🔵 Bouton Google cliqué');
+              handleGoogleSignup();
+            }}
             activeOpacity={0.8}
             disabled={googleLoading}
           >
-          {googleLoading ? (
-            <ActivityIndicator color="#1A1A1A" />
-          ) : (
-            <>
-              <GoogleLogo size={20} />
-              <Text style={styles.googleButtonText}>S'inscrire avec Google</Text>
-            </>
-          )}
+            {googleLoading ? (
+              <ActivityIndicator color="#1A1A1A" />
+            ) : (
+              <>
+                <GoogleLogo size={20} />
+                <Text style={styles.googleButtonText}>S'inscrire avec Google</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
