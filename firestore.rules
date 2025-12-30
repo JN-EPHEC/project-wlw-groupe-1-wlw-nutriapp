@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (request.auth.token.admin == true);
+    }
+
+    function isDoctor(doctorUid) {
+      return isSignedIn() && request.auth.uid == doctorUid && exists(/databases/$(database)/documents/doctors/$(doctorUid));
+    }
+
+    function doctorAccessDoc(patientUid, doctorUid) {
+      return get(/databases/$(database)/documents/users/$(patientUid)/doctorAccess/$(doctorUid));
+    }
+
+    function hasDoctorAccessDoc(patientUid, doctorUid) {
+      return exists(/databases/$(database)/documents/users/$(patientUid)/doctorAccess/$(doctorUid));
+    }
+
+    function hasActiveDoctorAccess(patientUid, doctorUid) {
+      return hasDoctorAccessDoc(patientUid, doctorUid)
+        && doctorAccessDoc(patientUid, doctorUid).data.status == 'ACTIVE';
+    }
+
+    function canDoctorReadProfile(patientUid, doctorUid) {
+      return hasActiveDoctorAccess(patientUid, doctorUid)
+        && doctorAccessDoc(patientUid, doctorUid).data.scopes.canReadProfile == true;
+    }
+
+    function canDoctorReadMeasurements(patientUid, doctorUid) {
+      return hasActiveDoctorAccess(patientUid, doctorUid)
+        && doctorAccessDoc(patientUid, doctorUid).data.scopes.canReadMeasurements == true;
+    }
+
+    function doctorAllowedTypes(patientUid, doctorUid) {
+      return doctorAccessDoc(patientUid, doctorUid).data.scopes.allowedTypes;
+    }
+
+    function canDoctorReadMeasurementType(patientUid, doctorUid, measurementType) {
+      return canDoctorReadMeasurements(patientUid, doctorUid)
+        && doctorAllowedTypes(patientUid, doctorUid)[measurementType] == true;
+    }
+
+    function onlyKeys(allowedKeys) {
+      return request.resource.data.keys().hasOnly(allowedKeys);
+    }
+
+    match /users/{uid} {
+      allow read: if isSelf(uid) || (isSignedIn() && canDoctorReadProfile(uid, request.auth.uid));
+      allow create: if isSelf(uid);
+      allow update, delete: if isSelf(uid);
+
+      match /dailyEntries/{dayKey} {
+        allow read, write: if isSelf(uid);
+      }
+
+      match /measurements/{measurementId} {
+        allow read: if isSelf(uid) || (isSignedIn() && canDoctorReadMeasurementType(uid, request.auth.uid, resource.data.type));
+        allow create, update, delete: if isSelf(uid);
+      }
+
+      match /conversations/{conversationId} {
+        allow read, write: if isSelf(uid);
+
+        match /messages/{messageId} {
+          allow read, write: if isSelf(uid);
+        }
+      }
+
+      match /doctorAccess/{doctorUid} {
+        // Patient controls access for each doctor.
+        allow read: if isSelf(uid);
+
+        // Patient can create/update/revoke anytime.
+        allow create, update, delete: if isSelf(uid);
+
+        // Doctor can only update an existing relationship from PENDING to ACTIVE/REVOKED.
+        allow update: if isDoctor(doctorUid)
+          && resource.data.status == 'PENDING'
+          && (request.resource.data.status == 'ACTIVE' || request.resource.data.status == 'REVOKED')
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['status', 'linkedAt', 'scopes']);
+      }
+    }
+
+    match /doctors/{doctorUid} {
+      allow read: if isDoctor(doctorUid);
+      allow create, update, delete: if isDoctor(doctorUid);
+
+      match /patients/{patientUid} {
+        allow read: if isDoctor(doctorUid);
+
+        // Doctor creates/updates its own patient list if the patient initiated access (PENDING or ACTIVE).
+        allow create, update: if isDoctor(doctorUid) && hasDoctorAccessDoc(patientUid, doctorUid);
+
+        // Patient may update the embedded patientSummary for performance (MVP client-side),
+        // but cannot create the relationship or change status/linkedAt.
+        allow update: if isSelf(patientUid)
+          && hasActiveDoctorAccess(patientUid, doctorUid)
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['patientSummary', 'updatedAt']);
+
+        allow delete: if false;
+      }
+    }
+
+    match /affiliationRequests/{requestId} {
+      function isDoctorTarget() {
+        return isSignedIn() && request.auth.uid == resource.data.doctorUid;
+      }
+
+      function isPatientOwner() {
+        return isSignedIn() && request.auth.uid == resource.data.patientUid;
+      }
+
+      // Patient creates a request for a doctor.
+      allow create: if isSignedIn()
+        && request.resource.data.patientUid == request.auth.uid
+        && request.resource.data.status == 'PENDING'
+        && request.resource.data.doctorUid is string
+        && request.resource.data.createdAt is timestamp;
+
+      // Doctor lists/reads incoming requests, patient can read their own.
+      allow read: if (isSignedIn() && request.auth.uid == resource.data.doctorUid)
+        || (isSignedIn() && request.auth.uid == resource.data.patientUid);
+
+      // Doctor decides; patient can cancel.
+      allow update: if (
+        (isSignedIn() && request.auth.uid == resource.data.doctorUid
+          && resource.data.status == 'PENDING'
+          && (request.resource.data.status == 'ACCEPTED' || request.resource.data.status == 'REJECTED')
+          && request.resource.data.decidedAt is timestamp)
+        ||
+        (isSignedIn() && request.auth.uid == resource.data.patientUid
+          && resource.data.status == 'PENDING'
+          && request.resource.data.status == 'CANCELLED')
+      );
+
+      allow delete: if false;
+    }
+
+    match /recipes/{recipeId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /catalog/{collectionId}/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /daily/recipeOfTheDay/{dayKey} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
