@@ -34,6 +34,7 @@ __MACOSX/
 
 # local env files
 .env*.local
+.env
 
 # Firebase local config
 firebase_env.js

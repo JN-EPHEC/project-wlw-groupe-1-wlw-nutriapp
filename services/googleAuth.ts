@@ -131,6 +131,83 @@ export const signInWithGoogleAsync = async (): Promise<GoogleAuthResult> => {
 
   const nonce = Crypto.randomUUID();
 
+  // Expo Go + auth.expo.io:
+  // Use the implicit `id_token` flow to avoid exchanging an authorization code on-device.
+  // Google often treats Web OAuth clients as confidential (client_secret required) for code exchange,
+  // which breaks in a public client like Expo Go.
+  if (useProxy) {
+    const request = new AuthSession.AuthRequest({
+      clientId,
+      scopes: ['openid', 'profile', 'email'],
+      responseType: AuthSession.ResponseType.IdToken,
+      redirectUri,
+      extraParams: {
+        nonce,
+        prompt: 'select_account',
+      },
+    });
+
+    console.log('[GoogleAuth] (ExpoGo) clientId:', clientId);
+    console.log('[GoogleAuth] (ExpoGo) useProxy:', useProxy, 'redirectUri:', redirectUri);
+
+    const result = await request.promptAsync(
+      discovery,
+      ({
+        useProxy,
+        projectNameForProxy: projectNameForProxy ?? undefined,
+      } as unknown) as any
+    );
+
+    console.log('[GoogleAuth] (ExpoGo) resultType:', result.type);
+    if (result.type !== 'success') {
+      console.log('[GoogleAuth] (ExpoGo) result:', JSON.stringify(result));
+    }
+
+    if (result.type === 'success') {
+      const idToken = (result.params as any)?.id_token;
+      if (!idToken) {
+        return { success: false, error: 'id_token non reçu. Vérifiez la configuration OAuth (redirect URI / client_id).' };
+      }
+      return { success: true, idToken };
+    }
+
+    if (result.type === 'cancel') {
+      return { success: false, error: "Authentification annulée par l'utilisateur" };
+    }
+
+    if (result.type === 'dismiss') {
+      return { success: false, error: "Fenêtre d'authentification fermée" };
+    }
+
+    if (result.type === 'error') {
+      const anyResult = result as any;
+      const errorCode = anyResult?.params?.error ?? anyResult?.errorCode ?? anyResult?.error?.code;
+      const errorDescription = anyResult?.params?.error_description ?? anyResult?.error?.message;
+
+      if (errorCode === 'redirect_uri_mismatch') {
+        return {
+          success: false,
+          error:
+            'Google OAuth: redirect_uri_mismatch. Ajoutez exactement cette URL dans Google Cloud → Authorized redirect URIs: ' +
+            redirectUri,
+        };
+      }
+
+      if (errorCode === 'invalid_client') {
+        return {
+          success: false,
+          error:
+            'Google OAuth: invalid_client. Vérifiez que EXPO_PUBLIC_GOOGLE_CLIENT_ID (Web client) correspond au client_id configuré dans Google Cloud/Firebase.',
+        };
+      }
+
+      const message = errorDescription ?? 'Erreur inconnue';
+      return { success: false, error: `Erreur OAuth${errorCode ? ` (${errorCode})` : ''}: ${message}` };
+    }
+
+    return { success: false, error: `Type de résultat inattendu: ${result.type}` };
+  }
+
   // Use Authorization Code + PKCE because it is the most reliable flow on Expo Go
   // when using the auth.expo.io proxy (some browsers block implicit/hybrid responses).
   const request = new AuthSession.AuthRequest({
