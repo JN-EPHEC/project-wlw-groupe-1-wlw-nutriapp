@@ -1,0 +1,173 @@
+export type Recipe = {
+  id: string;
+  title: string;
+  image: string;
+  time: number;
+  calories: number;
+  tags: string[];
+  favorite: boolean;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sodium: number;
+  ingredients: string[];
+  steps: string[];
+  category: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  description?: string;
+};
+
+export const recipes: Recipe[] = [
+  {
+    id: '1',
+    title: 'Salade Keto complète',
+    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?auto=format&fit=crop&w=1080&q=80',
+    time: 15,
+    calories: 370,
+    tags: ['Compatible diabète', 'Sans gluten', 'Faible glucides'],
+    favorite: true,
+    protein: 18,
+    carbs: 12,
+    fat: 28,
+    sodium: 220,
+    ingredients: [
+      '½ cup extra-virgin olive oil',
+      '¼ cup lime juice',
+      '¼ avocado',
+      '½ teaspoon salt',
+      '½ teaspoon freshly ground pepper',
+      'Pinch of minced garlic',
+      '150g mixed greens',
+      '100g grilled chicken strips',
+    ],
+    steps: [
+      "Mélanger l'huile d'olive, le jus de citron vert, l'avocat, le sel, le poivre et l'ail",
+      'Disposer les légumes verts',
+      'Ajouter le poulet grillé',
+      'Arroser de vinaigrette',
+      'Servir immédiatement',
+    ],
+    category: 'lunch',
+    description: 'Healthy and nutritious food recipes',
+  },
+  {
+    id: '2',
+    title: 'Poulet grillé & Légumes',
+    image: 'https://images.unsplash.com/photo-1682423187670-4817da9a1b23?auto=format&fit=crop&w=1080&q=80',
+    time: 35,
+    calories: 450,
+    tags: ['Riche en protéines', 'Sans lactose', 'Faible sel'],
+    favorite: false,
+    protein: 45,
+    carbs: 35,
+    fat: 12,
+    sodium: 180,
+    ingredients: [
+      '250g de blanc de poulet',
+      '200g de brocoli',
+      '1 poivron rouge',
+      '1 courgette',
+      "Huile d'olive",
+      'Épices cajun',
+      'Citron',
+    ],
+    steps: [
+      'Préchauffer le grill',
+      'Assaisonner le poulet',
+      'Couper les légumes',
+      'Griller le poulet 6-8 min/face',
+      'Sauter les légumes 10 min',
+      'Servir avec citron',
+    ],
+    category: 'dinner',
+    description: 'Grilled chicken with seasonal vegetables',
+  },
+  {
+    id: '3',
+    title: 'Porridge aux baies',
+    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?auto=format&fit=crop&w=1080&q=80',
+    time: 10,
+    calories: 320,
+    tags: ['Végétarien', 'Riche en fibres', 'Sans gluten'],
+    favorite: true,
+    protein: 12,
+    carbs: 55,
+    fat: 8,
+    sodium: 95,
+    ingredients: [
+      "80g de flocons d'avoine sans gluten",
+      "300ml de lait d'amande",
+      '100g de myrtilles',
+      '50g de framboises',
+      '1 c. à soupe de miel',
+      'Graines de chia',
+      'Amandes effilées',
+    ],
+    steps: [
+      "Porter le lait d'amande à ébullition",
+      "Ajouter l'avoine et réduire le feu",
+      'Cuire 5-7 minutes',
+      'Verser dans un bol et garnir',
+    ],
+    category: 'breakfast',
+    description: 'Warm oatmeal with fresh berries',
+  },
+  {
+    id: '4',
+    title: 'Saumon & Légumes vapeur',
+    image: 'https://images.unsplash.com/photo-1746783840967-738ea85b0f25?auto=format&fit=crop&w=1080&q=80',
+    time: 25,
+    calories: 380,
+    tags: ['Compatible diabète', 'Riche en Oméga-3', 'Hypertension'],
+    favorite: false,
+    protein: 35,
+    carbs: 18,
+    fat: 20,
+    sodium: 150,
+    ingredients: [
+      '200g de filet de saumon',
+      'Haricots verts',
+      'Carottes',
+      'Citron',
+      'Aneth',
+      "Huile d'olive",
+      'Poivre',
+    ],
+    steps: ['Préparer le cuiseur', 'Assaisonner', 'Cuire le saumon', 'Cuire les légumes', 'Servir'],
+    category: 'dinner',
+    description: 'Steamed salmon with fresh vegetables',
+  },
+  {
+    id: '5',
+    title: 'Smoothie vert détox',
+    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?auto=format&fit=crop&w=1080&q=80',
+    time: 5,
+    calories: 180,
+    tags: ['Végétarien', 'Antioxydants', 'Sans lactose'],
+    favorite: true,
+    protein: 6,
+    carbs: 32,
+    fat: 4,
+    sodium: 45,
+    ingredients: ['Banane', 'Épinards', 'Concombre', 'Pomme verte', "Eau de coco", 'Citron', 'Gingembre'],
+    steps: ['Mixer tous les ingrédients', 'Servir frais'],
+    category: 'snack',
+    description: 'Detox green smoothie',
+  },
+  {
+    id: '6',
+    title: 'Curry de lentilles corail',
+    image: 'https://images.unsplash.com/photo-1629032355269-bde5c5da4ab2?auto=format&fit=crop&w=1080&q=80',
+    time: 35,
+    calories: 360,
+    tags: ['Végétarien', 'Sans gluten', 'Riche en protéines'],
+    favorite: false,
+    protein: 18,
+    carbs: 52,
+    fat: 9,
+    sodium: 170,
+    ingredients: ['Lentilles corail', 'Lait de coco', 'Oignon', 'Ail', 'Curry', 'Curcuma', 'Gingembre', 'Coriandre'],
+    steps: ['Faire revenir', 'Ajouter épices', 'Ajouter lentilles', 'Laisser mijoter 25 min'],
+    category: 'dinner',
+    description: 'Creamy red lentil curry',
+  },
+];

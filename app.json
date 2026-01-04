@@ -2,14 +2,16 @@
   "expo": {
     "name": "Project-BA",
     "slug": "Project-BA",
+    "owner": "kazmiaf",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "projectba",
+    "scheme": "nutriadapt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.Project-BA"
     },
     "android": {
       "adaptiveIcon": {
