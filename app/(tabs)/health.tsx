@@ -578,10 +578,10 @@ export function HealthScreen() {
               ) : null}
 
               <View style={styles.chartData}>
-                {chartSeries.bars.map((b) => {
+                {chartSeries.bars.map((b, index) => {
                   const barHeight = (b.value / chartSeries.max) * chartHeight;
                   return (
-                    <View key={b.label} style={styles.dataPoint}>
+                    <View key={`${b.label}-${index}`} style={styles.dataPoint}>
                       <Text style={styles.dataValue}>{b.display}</Text>
                       <View style={[styles.dataBar, { height: barHeight, backgroundColor: b.color }]} />
                       <Text style={styles.dataLabel}>{b.label}</Text>
