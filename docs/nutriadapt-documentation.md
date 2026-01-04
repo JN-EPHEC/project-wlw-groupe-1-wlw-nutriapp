@@ -181,8 +181,8 @@ Le cahier des charges initial prévoyait une structure de type web (React + Tail
 ### 5.5 Santé (`HealthTracking.tsx`)
 - Header dégradé vert + CTA (« Encoder mes données », « Chat avec mon médecin »)
 - Alertes si valeurs anormales
-- Statistiques rapides (Glycémie, Poids, Tension, Activité)
-- Onglets métriques + graphiques Recharts (glycémie, poids, tension)
+- Statistiques rapides (Glycémie, Poids, Eau, Activité)
+- Onglets métriques + graphiques Recharts (glycémie, poids, eau)
 - Valeurs anormales listées sous le graphique
 - `DataEntryForm` : modal de saisie adaptée par métrique
 - `DoctorChat` : modal chat médecin
@@ -203,7 +203,7 @@ Le cahier des charges initial prévoyait une structure de type web (React + Tail
 | `FilterPanel.tsx` | Filtres multi-critères pour les recettes |
 | `RecipeTimer.tsx` | Timer modal (start/stop/reset) pour la préparation |
 | `AIChat.tsx` | Vue de conversation IA réutilisable |
-| `DataEntryForm.tsx` | Formulaire multi-métriques (glycémie, poids, tension) |
+| `DataEntryForm.tsx` | Formulaire multi-métriques (glycémie, poids, eau) |
 | `DoctorChat.tsx` | Chat médecin (avatar stéthoscope) |
 | `EditProfileModal.tsx` | Mise à jour des infos (photo, âge, taille, poids, activité) |
 | `EditGoalsModal.tsx` | Sélection des 5 objectifs standard |

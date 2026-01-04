@@ -47,7 +47,6 @@ export const createAffiliationRequest = async (
         bp: true,
         activity: true,
         water: true,
-        hba1c: true,
       },
     },
   };
@@ -108,7 +107,6 @@ export const acceptAffiliationRequest = async (requestId: string): Promise<void>
           birthDate: req.snapshot.birthDate ?? null,
           sex: req.snapshot.sex ?? null,
           mainPathology: req.snapshot.medical?.mainPathology ?? null,
-          lastHbA1c: undefined,
           lastFollowUpAt: undefined,
           status: undefined,
         },

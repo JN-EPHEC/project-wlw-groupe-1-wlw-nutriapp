@@ -4,6 +4,7 @@ import {
     GoogleAuthProvider,
     User,
     createUserWithEmailAndPassword,
+  deleteUser,
     signOut as firebaseSignOut,
     onAuthStateChanged,
     sendPasswordResetEmail,
@@ -39,6 +40,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   'auth/popup-closed-by-user': "La fenêtre Google s'est fermée avant la validation.",
   'auth/cancelled-popup-request': 'Une autre fenêtre de connexion est déjà ouverte.',
   'auth/popup-blocked': 'Le navigateur a bloqué la fenêtre de connexion Google.',
+  'auth/requires-recent-login': 'Veuillez vous reconnecter avant de supprimer votre compte.',
 };
 
 const mapAuthError = (fallback: string) => (error: unknown) => {
@@ -127,6 +129,20 @@ export const signOut = async (): Promise<BasicResponse> => {
   } catch (error: any) {
     console.error('Error signing out:', error);
     return { success: false, error: mapAuthError('Déconnexion impossible.')(error) };
+  }
+};
+
+export const deleteAccount = async (): Promise<BasicResponse> => {
+  try {
+    const current = auth.currentUser;
+    if (!current) {
+      return { success: false, error: 'Utilisateur non connecté' };
+    }
+    await deleteUser(current);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting account:', error);
+    return { success: false, error: mapAuthError('Suppression du compte impossible.')(error) };
   }
 };
 

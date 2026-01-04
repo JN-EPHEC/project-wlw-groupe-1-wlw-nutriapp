@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants';
+import { sanitizeGoals } from '@/constants/goalRules';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { OnboardingStep1 } from './OnboardingStep1';
@@ -145,7 +146,7 @@ export const OnboardingFlow = () => {
       activityLevel: profileData.activityLevel,
       conditions: sanitizedConditions,
       allergies: sanitizedAllergies,
-      goals: profileData.goals,
+      goals: sanitizeGoals(profileData.goals),
       dataSharing: profileData.dataSharing,
       healthNotifications: profileData.healthNotifications,
       hasCompletedOnboarding: true,

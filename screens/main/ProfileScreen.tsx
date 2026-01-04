@@ -1,11 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SettingsInfoKey, SettingsInfoModal } from '@/components/SettingsInfoModal';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -18,6 +30,7 @@ type HealthProfile = {
   conditions: string[];
   allergies: string[];
 };
+
 
 const sanitizeStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -59,8 +72,18 @@ const showComingSoon = (title: string) => {
 };
 
 export function ProfileScreen() {
-  const { user, userProfile, logout } = useAuth();
+  const { user, userProfile, logout, deleteAccount } = useAuth();
   const [notifications, setNotifications] = useState(true);
+  const [activeSettingsModal, setActiveSettingsModal] = useState<SettingsInfoKey | null>(null);
+
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const healthProfile = useMemo<HealthProfile>(() => {
     const flatProfile = (userProfile ?? {}) as Record<string, unknown>;
@@ -79,23 +102,76 @@ export function ProfileScreen() {
   }, [userProfile]);
 
   const handleLogout = () => {
-    Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
-      { text: 'Annuler', style: 'cancel' },
-      {
-        text: 'Déconnexion',
-        style: 'destructive',
-        onPress: async () => {
-          const result = await logout();
-          if (!result.success) {
-            Alert.alert('Erreur', result.error ?? "Impossible de se déconnecter pour le moment.");
-          }
-        },
-      },
-    ]);
+    setLogoutError(null);
+    setLogoutConfirmVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    if (logoutLoading) return;
+    setLogoutLoading(true);
+    setLogoutError(null);
+    try {
+      const result = await logout();
+      if (!result.success) {
+        setLogoutError(result.error ?? "Impossible de se déconnecter pour le moment.");
+      } else {
+        setLogoutConfirmVisible(false);
+      }
+    } finally {
+      setLogoutLoading(false);
+    }
   };
 
   const handleEditProfile = () => {
     showComingSoon('Modification du profil');
+  };
+
+  const handleDeleteAccount = () => {
+    if (!deleteAccount) {
+      Alert.alert('Indisponible', "La suppression du compte n'est pas disponible pour le moment.");
+      return;
+    }
+
+    setActiveSettingsModal(null);
+    setDeleteEmail('');
+    setDeleteError(null);
+    setDeleteConfirmVisible(true);
+  };
+
+  const currentEmail = (user?.email ?? '').trim();
+  const emailMatches =
+    currentEmail.length > 0 && deleteEmail.trim().toLowerCase() === currentEmail.toLowerCase();
+
+  const confirmDeleteAccount = async () => {
+    if (!deleteAccount) return;
+    if (deleteLoading) return;
+
+    if (!currentEmail) {
+      setDeleteError("Aucune adresse email n'est associée à ce compte.");
+      return;
+    }
+
+    if (!emailMatches) {
+      setDeleteError("L'adresse email ne correspond pas.");
+      return;
+    }
+
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      const result = await deleteAccount();
+      if (!result.success) {
+        setDeleteError(
+          result.error ??
+            "Impossible de supprimer le compte. Il peut être nécessaire de vous reconnecter avant de réessayer.",
+        );
+        return;
+      }
+      setDeleteConfirmVisible(false);
+      setDeleteEmail('');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -224,7 +300,7 @@ export function ProfileScreen() {
 
               <TouchableOpacity
                 style={styles.settingItem}
-                onPress={() => showComingSoon('Confidentialité')}
+                onPress={() => setActiveSettingsModal('privacy')}
                 activeOpacity={0.8}
               >
                 <View style={styles.settingLeft}>
@@ -239,7 +315,7 @@ export function ProfileScreen() {
 
               <TouchableOpacity
                 style={styles.settingItem}
-                onPress={() => showComingSoon('Aide & Support')}
+                onPress={() => setActiveSettingsModal('support')}
                 activeOpacity={0.8}
               >
                 <View style={styles.settingLeft}>
@@ -254,7 +330,7 @@ export function ProfileScreen() {
 
               <TouchableOpacity
                 style={styles.settingItem}
-                onPress={() => showComingSoon('Mentions légales')}
+                onPress={() => setActiveSettingsModal('legal')}
                 activeOpacity={0.8}
               >
                 <View style={styles.settingLeft}>
@@ -278,12 +354,149 @@ export function ProfileScreen() {
             title="Se déconnecter"
             onPress={handleLogout}
             variant="outline"
-            icon={<Ionicons name="log-out-outline" size={20} color="#EF4444" />}
+            icon={<Ionicons name="log-out-outline" size={20} color={Colors.status.error} />}
             style={styles.logoutButton}
             textStyle={styles.logoutText}
           />
         </View>
       </ScrollView>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={logoutConfirmVisible}
+        onRequestClose={() => setLogoutConfirmVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            if (!logoutLoading) setLogoutConfirmVisible(false);
+          }}
+        >
+          <Pressable style={styles.modalCardWrapper} onPress={() => undefined}>
+            <Card style={styles.modalCard}>
+              <View style={styles.modalHeaderRow}>
+                <Text style={styles.modalTitle}>Déconnexion</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (!logoutLoading) setLogoutConfirmVisible(false);
+                  }}
+                  hitSlop={12}
+                >
+                  <Ionicons name="close" size={22} color={Colors.neutral.gray600} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalBody}>Êtes-vous sûr de vouloir vous déconnecter ?</Text>
+
+              {logoutError ? <Text style={styles.modalError}>{logoutError}</Text> : null}
+
+              <View style={styles.modalActionsRow}>
+                <Button
+                  title="Annuler"
+                  variant="outline"
+                  onPress={() => setLogoutConfirmVisible(false)}
+                  disabled={logoutLoading}
+                  style={styles.modalActionButton}
+                />
+                <Button
+                  title="Déconnexion"
+                  variant="outline"
+                  onPress={confirmLogout}
+                  loading={logoutLoading}
+                  style={[styles.modalActionButton, styles.destructiveButton]}
+                  textStyle={styles.destructiveText}
+                />
+              </View>
+            </Card>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={deleteConfirmVisible}
+        onRequestClose={() => setDeleteConfirmVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            if (!deleteLoading) setDeleteConfirmVisible(false);
+          }}
+        >
+          <Pressable style={styles.modalCardWrapper} onPress={() => undefined}>
+            <Card style={styles.modalCard}>
+              <View style={styles.modalHeaderRow}>
+                <Text style={styles.modalTitle}>Supprimer mon compte</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (!deleteLoading) setDeleteConfirmVisible(false);
+                  }}
+                  hitSlop={12}
+                >
+                  <Ionicons name="close" size={22} color={Colors.neutral.gray600} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalBody}>
+                Cette action est irréversible. Pour confirmer, saisissez votre adresse email.
+              </Text>
+
+              <Input
+                label="Adresse email"
+                value={deleteEmail}
+                onChangeText={(text) => {
+                  setDeleteEmail(text);
+                  setDeleteError(null);
+                }}
+                placeholder={currentEmail || 'ex: nom@domaine.com'}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                error={deleteError ?? undefined}
+                editable={!deleteLoading}
+              />
+
+              <View style={styles.modalActionsRow}>
+                <Button
+                  title="Annuler"
+                  variant="outline"
+                  onPress={() => setDeleteConfirmVisible(false)}
+                  disabled={deleteLoading}
+                  style={styles.modalActionButton}
+                />
+                <Button
+                  title="Supprimer"
+                  variant="outline"
+                  onPress={confirmDeleteAccount}
+                  loading={deleteLoading}
+                  disabled={!emailMatches}
+                  style={[styles.modalActionButton, styles.destructiveButton]}
+                  textStyle={styles.destructiveText}
+                />
+              </View>
+            </Card>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <SettingsInfoModal
+        visible={activeSettingsModal !== null}
+        infoKey={activeSettingsModal}
+        onClose={() => setActiveSettingsModal(null)}
+        footer={
+          activeSettingsModal === 'privacy' ? (
+            <Button
+              title="Supprimer mon compte"
+              variant="outline"
+              onPress={handleDeleteAccount}
+              icon={<Ionicons name="trash-outline" size={20} color={Colors.status.error} />}
+              style={styles.deleteButton}
+              textStyle={styles.deleteText}
+            />
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -459,15 +672,68 @@ const styles = StyleSheet.create({
     color: Colors.neutral.gray600,
   },
   logoutButton: {
-    borderColor: '#EF4444',
+    borderColor: Colors.status.error,
     marginBottom: Spacing.xl,
   },
   logoutText: {
-    color: '#EF4444',
+    color: Colors.status.error,
+  },
+
+  deleteButton: {
+    borderColor: Colors.status.error,
+  },
+  deleteText: {
+    color: Colors.status.error,
   },
   appCopyright: {
     ...Typography.body2,
     color: Colors.neutral.gray600,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    backgroundColor: `${Colors.neutral.gray900}66`,
+  },
+  modalCardWrapper: {
+    width: '100%',
+    maxWidth: 520,
+  },
+  modalCard: {
+    gap: Spacing.lg,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  modalTitle: {
+    ...Typography.h3,
+    color: Colors.neutral.gray900,
+  },
+  modalBody: {
+    ...Typography.body2,
+    color: Colors.neutral.gray600,
+    lineHeight: 20,
+  },
+  modalError: {
+    ...Typography.body2,
+    color: Colors.status.error,
+  },
+  modalActionsRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  modalActionButton: {
+    flex: 1,
+  },
+  destructiveButton: {
+    borderColor: Colors.status.error,
+  },
+  destructiveText: {
+    color: Colors.status.error,
   },
 });
 

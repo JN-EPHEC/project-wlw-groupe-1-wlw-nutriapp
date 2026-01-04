@@ -217,29 +217,60 @@ export const upsertMeasurementsFromDaily = async (
       );
     }
 
-    if (typeof values.hba1c_percent === 'number') {
-      const mRef = doc(db, 'users', uid, 'measurements', measurementIdFor('hba1c', dayKey));
+    if (typeof values.calories_kcal === 'number') {
+      const mRef = doc(db, 'users', uid, 'measurements', measurementIdFor('kcal', dayKey));
       tx.set(
         mRef,
         {
           schemaVersion: 1,
-          type: 'hba1c',
+          type: 'kcal',
           ts,
           dayKey,
-          unit: '%',
-          value: values.hba1c_percent,
+          unit: 'kcal',
+          value: values.calories_kcal,
           source: 'dailyEntry',
           createdAt: now,
           updatedAt: now,
         } satisfies MeasurementDoc,
         { merge: true }
       );
-      summaryUpdates['summary.lastHbA1c'] = { value: values.hba1c_percent, ts };
     }
 
     // basic status field can be set by patient app logic; default stays as-is.
     tx.set(userRef, summaryUpdates, { merge: true });
   });
+};
+
+export type ListDailyEntriesOptions = {
+  from?: Timestamp;
+  to?: Timestamp;
+};
+
+export const listDailyEntries = async (
+  uid: string,
+  options: ListDailyEntriesOptions = {}
+): Promise<Array<{ id: string; data: DailyEntryDoc }>> => {
+  const ref = collection(db, 'users', uid, 'dailyEntries');
+  const constraints = [...buildTsRangeConstraints({ from: options.from, to: options.to }), orderBy('ts', 'asc')];
+  const q = query(ref, ...constraints);
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, data: d.data() as DailyEntryDoc }));
+};
+
+export const subscribeDailyEntries = (
+  uid: string,
+  options: ListDailyEntriesOptions,
+  onData: (items: Array<{ id: string; data: DailyEntryDoc }>) => void,
+  onError?: (e: Error) => void
+) => {
+  const ref = collection(db, 'users', uid, 'dailyEntries');
+  const constraints = [...buildTsRangeConstraints({ from: options.from, to: options.to }), orderBy('ts', 'asc')];
+  const q = query(ref, ...constraints);
+  return onSnapshot(
+    q,
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, data: d.data() as DailyEntryDoc }))),
+    (e) => onError?.(e as Error)
+  );
 };
 
 export const listMeasurements = async (

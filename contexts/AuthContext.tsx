@@ -1,10 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 
 import {
     AuthResponse,
     BasicResponse,
+  deleteAccount as deleteAccountRequest,
     onAuthStateChange,
     resetPassword as resetPasswordRequest,
     signInWithEmail,
@@ -13,6 +13,7 @@ import {
     signUpWithEmail,
 } from '@/services/authService';
 import { signInWithGoogleAsync } from '@/services/googleAuth';
+import { auth as firebaseAuth } from '@/services/firebase';
 import { getPatientProfile, updatePatientProfile } from '@/services/userService';
 
 export type AuthUser = {
@@ -38,6 +39,7 @@ export type AuthContextValue = {
   login: (email: string, password: string) => Promise<AuthActionResult>;
   loginWithGoogle: () => Promise<AuthActionResult>;
   logout: () => Promise<AuthActionResult>;
+  deleteAccount: () => Promise<AuthActionResult>;
   resetPassword: (email: string) => Promise<AuthActionResult>;
   updateUserProfile: (profileData: Record<string, unknown>) => Promise<AuthActionResult>;
   loadUserProfile: (uid?: string) => Promise<AuthActionResult>;
@@ -74,10 +76,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>(null);
   const [loading, setLoading] = useState(true);
+  const authEventCountRef = useRef(0);
 
   const loadUserProfile = useCallback(
     async (uid?: string): Promise<AuthActionResult> => {
-      const targetUid = uid ?? user?.uid;
+      const targetUid = uid ?? firebaseAuth.currentUser?.uid;
       if (!targetUid) {
         return { success: false, error: 'Utilisateur non connecté' };
       }
@@ -115,11 +118,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: error?.message ?? 'Impossible de charger le profil' };
       }
     },
-    [user?.uid]
+    []
   );
 
   const handleAuthState = useCallback(
     async (firebaseUser: any | null) => {
+      if (__DEV__) {
+        authEventCountRef.current += 1;
+        console.log('[Auth] onAuthStateChanged', {
+          n: authEventCountRef.current,
+          uid: firebaseUser?.uid ?? null,
+        });
+      }
       if (firebaseUser) {
         const mappedUser = mapFirebaseUser(firebaseUser);
         setUser(mappedUser);
@@ -209,17 +219,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadUserProfile]);
 
   const logout = useCallback(async () => {
-    const response = await signOut();
-    await AsyncStorage.clear();
-    setUser(null);
-    setUserProfile(null);
-    setIsLoggedIn(false);
-    return toActionResult(response);
+    setLoading(true);
+    try {
+      const response = await signOut();
+      return toActionResult(response);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
     const response = await resetPasswordRequest(email);
     return toActionResult(response);
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await deleteAccountRequest();
+      return toActionResult(response);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const updateUserProfile = useCallback(
@@ -231,10 +252,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const result = await updatePatientProfile(user.uid, profileData);
         if (result.success) {
-          const nextProfile: Record<string, unknown> = {
-            ...(userProfile ?? {}),
-            profile: profileData,
+          const current = (userProfile ?? {}) as Record<string, unknown>;
+          const currentNested =
+            typeof current.profile === 'object' && current.profile !== null
+              ? (current.profile as Record<string, unknown>)
+              : {};
+
+          const nextNested: Record<string, unknown> = {
+            ...currentNested,
+            ...profileData,
           };
+
+          const nextProfile: Record<string, unknown> = {
+            ...current,
+            profile: nextNested,
+          };
+
+          if (Object.prototype.hasOwnProperty.call(profileData, 'goals')) {
+            nextProfile.goals = {
+              ...(typeof current.goals === 'object' && current.goals !== null
+                ? (current.goals as Record<string, unknown>)
+                : {}),
+              selected: (profileData as any).goals ?? [],
+              updatedAt: new Date(),
+            };
+          }
 
           if (Object.prototype.hasOwnProperty.call(profileData, 'hasCompletedOnboarding')) {
             nextProfile.hasCompletedOnboarding = Boolean(profileData.hasCompletedOnboarding);
@@ -264,11 +306,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       loginWithGoogle,
       logout,
+      deleteAccount,
       resetPassword,
       updateUserProfile,
       loadUserProfile,
     }),
-    [isLoggedIn, user, userProfile, loading, signup, login, loginWithGoogle, logout, resetPassword, updateUserProfile, loadUserProfile]
+    [
+      isLoggedIn,
+      user,
+      userProfile,
+      loading,
+      signup,
+      login,
+      loginWithGoogle,
+      logout,
+      deleteAccount,
+      resetPassword,
+      updateUserProfile,
+      loadUserProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

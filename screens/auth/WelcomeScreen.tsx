@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import GoogleLogo from '@/components/GoogleLogo';
 import { Logo } from '@/components/Logo';
+import { SettingsInfoKey, SettingsInfoModal } from '@/components/SettingsInfoModal';
 import { Button, Card, Input } from '@/components/ui';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +30,8 @@ type WelcomeScreenProps = {
 export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
   const router = useRouter();
   const { signup, login, loginWithGoogle } = useAuth();
+
+  const [activeInfoModal, setActiveInfoModal] = useState<SettingsInfoKey | null>(null);
 
   const [mode, setMode] = useState<FormMode>(initialMode);
   const [email, setEmail] = useState('');
@@ -170,10 +173,29 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
                 {rgpdAccepted ? <Ionicons name="checkmark" size={16} color={Colors.neutral.white} /> : null}
               </View>
               <Text style={styles.checkboxText}>
-                J'accepte que mes données de santé soient traitées conformément au RGPD et à la politique de
-                confidentialité.
+                J'accepte que mes données de santé soient traitées conformément au RGPD et à la{' '}
+                <Text style={styles.legalInlineLink} onPress={() => setActiveInfoModal('privacy')}>
+                  politique de confidentialité
+                </Text>
+                .
               </Text>
             </TouchableOpacity>
+          )}
+
+          {isSignup && (
+            <View style={styles.legalCard}>
+              <Text style={styles.legalText}>
+                En continuant, vous acceptez nos{' '}
+                <Text style={styles.legalInlineLink} onPress={() => setActiveInfoModal('legal')}>
+                  Conditions d'utilisation
+                </Text>{' '}
+                et notre{' '}
+                <Text style={styles.legalInlineLink} onPress={() => setActiveInfoModal('privacy')}>
+                  Politique de confidentialité
+                </Text>
+                .
+              </Text>
+            </View>
           )}
 
           <Button
@@ -213,6 +235,12 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <SettingsInfoModal
+        visible={activeInfoModal !== null}
+        infoKey={activeInfoModal}
+        onClose={() => setActiveInfoModal(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -309,5 +337,22 @@ const styles = StyleSheet.create({
     flex: 1,
     ...Typography.body2,
     color: Colors.neutral.gray600,
+  },
+
+  legalCard: {
+    padding: Spacing.md,
+    backgroundColor: Colors.neutral.gray100,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+  },
+  legalText: {
+    ...Typography.body2,
+    color: Colors.neutral.gray600,
+    textAlign: 'center',
+  },
+  legalInlineLink: {
+    color: Colors.primary.green,
+    fontWeight: '500',
   },
 });

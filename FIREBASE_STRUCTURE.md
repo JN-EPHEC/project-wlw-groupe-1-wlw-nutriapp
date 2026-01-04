@@ -16,7 +16,7 @@ users/
     demographics: { birthDate?, sex?, heightCm? }
     medical: { mainPathology?, pathologies[], allergies[], treatments[], notes? }
     goals: { selected[], updatedAt }
-    summary: { lastFollowUpAt, status, lastHbA1c?, lastWeight?, lastGlucose?, bmi? }
+    summary: { lastFollowUpAt, status, lastWeight?, lastGlucose?, bmi? }
 
     dailyEntries/
       {YYYY-MM-DD}/

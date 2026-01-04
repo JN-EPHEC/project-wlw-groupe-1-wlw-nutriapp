@@ -50,7 +50,7 @@ export const getPatientDossierForDoctor = async (
 
   const latest: Partial<Record<MeasurementType, MeasurementDoc>> = {};
 
-  const types: MeasurementType[] = ['glucose', 'weight', 'bp', 'activity', 'water', 'hba1c'];
+  const types: MeasurementType[] = ['glucose', 'weight', 'bp', 'activity', 'water'];
   for (const type of types) {
     const mRef = collection(db, 'users', patientUid, 'measurements');
     const q = query(mRef, where('type', '==', type), orderBy('ts', 'desc'), limit(1));

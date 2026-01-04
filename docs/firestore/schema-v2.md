@@ -37,7 +37,6 @@ Objectif : remplacer progressivement le modèle legacy `users/{uid}.health.*[]` 
   summary?: {
     lastFollowUpAt?: Timestamp,
     status?: 'ALERTE'|'SURVEILLER'|'STABLE'|string,
-    lastHbA1c?: { value: number, ts: Timestamp },
     lastWeight?: { value: number, ts: Timestamp },
     lastGlucose?: { value: number, ts: Timestamp },
     bmi?: { value: number, ts: Timestamp },
@@ -67,7 +66,6 @@ Objectif : remplacer progressivement le modèle legacy `users/{uid}.health.*[]` 
     bp_diastolic?: number,
     activity_min?: number,
     water_l?: number,
-    hba1c_percent?: number,
   },
   createdAt: Timestamp,
   updatedAt: Timestamp
@@ -81,7 +79,7 @@ Objectif : remplacer progressivement le modèle legacy `users/{uid}.health.*[]` 
 ```ts
 {
   schemaVersion: 1,
-  type: 'glucose'|'weight'|'bp'|'activity'|'water'|'hba1c'|string,
+  type: 'glucose'|'weight'|'bp'|'activity'|'water'|string,
   ts: Timestamp,
   dayKey: 'YYYY-MM-DD',
   unit?: string,
@@ -122,7 +120,6 @@ Objectif : remplacer progressivement le modèle legacy `users/{uid}.health.*[]` 
     birthDate?: string,
     sex?: string,
     mainPathology?: string,
-    lastHbA1c?: { value: number, ts: Timestamp },
     lastFollowUpAt?: Timestamp,
     status?: string
   }
@@ -147,7 +144,6 @@ Objectif : remplacer progressivement le modèle legacy `users/{uid}.health.*[]` 
       bp?: boolean,
       activity?: boolean,
       water?: boolean,
-      hba1c?: boolean,
       [k: string]: boolean
     }
   }
@@ -231,7 +227,7 @@ Note Firestore : on ne peut pas combiner 2 filtres de type `array-contains/array
 
 - Conserver `users/{uid}.health.*[]` en lecture (pas d'écriture nouvelle).
 - Sur première ouverture « Santé », migrer dans le background :
-  - Lire `health.glycemia[]`, `health.weightHistory[]`, `health.tension[]`…
+  - Lire `health.glycemia[]`, `health.weightHistory[]`…
   - Écrire dans `measurements` (idempotent par `${type}_${dayKey}`) + `dailyEntries/{dayKey}`.
   - Marquer `users/{uid}.legacy.migratedAt`.
 

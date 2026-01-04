@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui';
+import { SettingsInfoKey, SettingsInfoModal } from '@/components/SettingsInfoModal';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants';
 
 import { OnboardingProfile, UpdateOnboardingProfile } from './types';
@@ -13,6 +15,8 @@ type OnboardingStep4Props = {
 };
 
 export const OnboardingStep4 = ({ data, updateData }: OnboardingStep4Props) => {
+  const [activeInfoModal, setActiveInfoModal] = useState<SettingsInfoKey | null>(null);
+
   return (
     <View style={styles.container}>
       <View style={styles.infoCard}>
@@ -61,10 +65,23 @@ export const OnboardingStep4 = ({ data, updateData }: OnboardingStep4Props) => {
 
       <View style={styles.legalCard}>
         <Text style={styles.legalText}>
-          En continuant, vous acceptez nos <Text style={styles.legalLink}>Conditions d'utilisation</Text> et notre{' '}
-          <Text style={styles.legalLink}>Politique de confidentialité</Text>.
+          En continuant, vous acceptez nos{' '}
+          <Text style={styles.legalLink} onPress={() => setActiveInfoModal('legal')}>
+            Conditions d'utilisation
+          </Text>{' '}
+          et notre{' '}
+          <Text style={styles.legalLink} onPress={() => setActiveInfoModal('privacy')}>
+            Politique de confidentialité
+          </Text>
+          .
         </Text>
       </View>
+
+      <SettingsInfoModal
+        visible={activeInfoModal !== null}
+        infoKey={activeInfoModal}
+        onClose={() => setActiveInfoModal(null)}
+      />
     </View>
   );
 };

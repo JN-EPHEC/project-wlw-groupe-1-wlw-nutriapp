@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -18,10 +19,11 @@ type RecipeFiltersProps = {
   selectedFilters: string[];
   onToggle: (filterId: string) => void;
   onClear?: () => void;
+  rightAction?: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
 
-export function RecipeFilters({ filters, selectedFilters, onToggle, onClear, style }: RecipeFiltersProps) {
+export function RecipeFilters({ filters, selectedFilters, onToggle, onClear, rightAction, style }: RecipeFiltersProps) {
   const hasSelection = selectedFilters.length > 0;
 
   return (
@@ -34,12 +36,15 @@ export function RecipeFilters({ filters, selectedFilters, onToggle, onClear, sty
             {hasSelection ? `${selectedFilters.length} filtre${selectedFilters.length > 1 ? 's' : ''} actif${selectedFilters.length > 1 ? 's' : ''}` : 'Affinez selon vos objectifs santé'}
           </Text>
         </View>
-        {hasSelection && onClear ? (
-          <TouchableOpacity style={styles.resetButton} onPress={onClear}>
-            <Ionicons name="close-circle" size={18} color={Colors.primary.green} />
-            <Text style={styles.resetButtonText}>Réinitialiser</Text>
-          </TouchableOpacity>
-        ) : null}
+        <View style={styles.headerRight}>
+          {rightAction}
+          {hasSelection && onClear ? (
+            <TouchableOpacity style={styles.resetButton} onPress={onClear}>
+              <Ionicons name="close-circle" size={18} color={Colors.primary.green} />
+              <Text style={styles.resetButtonText}>Réinitialiser</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       <ScrollView
@@ -97,6 +102,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.md,
     gap: Spacing.md,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   title: {
     ...Typography.body1,

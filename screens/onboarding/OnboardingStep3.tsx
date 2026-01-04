@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '@/components/ui';
-import { BorderRadius, Colors, Spacing, Typography } from '@/constants';
+import { BorderRadius, Colors, GOALS, Spacing, toggleGoalWithConflicts, Typography, type GoalId } from '@/constants';
 
 import { OnboardingProfile, UpdateOnboardingProfile } from './types';
 
@@ -12,22 +12,10 @@ type OnboardingStep3Props = {
   updateData: UpdateOnboardingProfile;
 };
 
-const goals = [
-  { id: 'stabilize-glucose', label: 'Stabiliser ma glycémie' },
-  { id: 'lose-weight', label: 'Perdre du poids' },
-  { id: 'maintain-weight', label: 'Maintenir mon poids' },
-  { id: 'gain-weight', label: 'Prendre du poids' },
-  { id: 'improve-nutrition', label: 'Améliorer mon alimentation' },
-];
-
 export const OnboardingStep3 = ({ data, updateData }: OnboardingStep3Props) => {
   const toggleGoal = (id: string) => {
-    const current = data.goals || [];
-    if (current.includes(id)) {
-      updateData({ goals: current.filter((goal) => goal !== id) });
-    } else {
-      updateData({ goals: [...current, id] });
-    }
+    const current = (data.goals || []) as GoalId[];
+    updateData({ goals: toggleGoalWithConflicts(current, id as GoalId) });
   };
 
   return (
@@ -37,7 +25,7 @@ export const OnboardingStep3 = ({ data, updateData }: OnboardingStep3Props) => {
           <Ionicons name="flag-outline" size={16} color={Colors.neutral.gray600} />
           <Text style={styles.sectionLabel}>Sélectionnez vos objectifs santé</Text>
         </View>
-        {goals.map((goal) => {
+        {GOALS.map((goal) => {
           const isSelected = data.goals?.includes(goal.id) ?? false;
           return (
             <TouchableOpacity

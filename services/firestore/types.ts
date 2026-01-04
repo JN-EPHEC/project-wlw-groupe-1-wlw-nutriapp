@@ -8,7 +8,6 @@ export type MeasurementType =
   | 'bp'
   | 'activity'
   | 'water'
-  | 'hba1c'
   | (string & {});
 
 export type PatientRole = 'patient';
@@ -46,7 +45,6 @@ export type PatientDoc = {
   summary?: {
     lastFollowUpAt?: Timestamp;
     status?: PatientSummaryStatus;
-    lastHbA1c?: { value: number; ts: Timestamp };
     lastWeight?: { value: number; ts: Timestamp };
     lastGlucose?: { value: number; ts: Timestamp };
     bmi?: { value: number; ts: Timestamp };
@@ -70,7 +68,7 @@ export type DailyEntryValues = {
   bp_diastolic?: number;
   activity_min?: number;
   water_l?: number;
-  hba1c_percent?: number;
+  calories_kcal?: number;
 };
 
 export type DailyEntryDoc = {

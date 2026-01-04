@@ -1,4 +1,7 @@
 import { Timestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+
+import { sanitizeGoals } from '@/constants/goalRules';
+
 import { db } from './firebase';
 
 type FirestoreValue = Record<string, unknown>;
@@ -12,8 +15,10 @@ export const createPatientProfile = async (userId: string, profileData: Record<s
       return { success: true, alreadyExists: true };
     }
 
-    const onboardingCompleted = Boolean(profileData.hasCompletedOnboarding);
+    const onboardingCompleted = Boolean((profileData as any).hasCompletedOnboarding);
     const now = Timestamp.now();
+    const sanitizedGoals = sanitizeGoals((profileData as any).goals ?? (profileData as any).objectives ?? []);
+
     const initialData: FirestoreValue = {
       // V2 schema (non-breaking addition)
       role: 'patient',
@@ -32,7 +37,7 @@ export const createPatientProfile = async (userId: string, profileData: Record<s
         notes: (profileData as any).patientNote ?? null,
       },
       goals: {
-        selected: (profileData as any).objectives ?? (profileData as any).goals ?? [],
+        selected: sanitizedGoals,
         updatedAt: now,
       },
       summary: {
@@ -43,15 +48,16 @@ export const createPatientProfile = async (userId: string, profileData: Record<s
         schemaVersion: 1,
       },
 
-      email: profileData.email ?? null,
-      displayName: profileData.displayName ?? null,
+      email: (profileData as any).email ?? null,
+      displayName: (profileData as any).displayName ?? null,
       hasCompletedOnboarding: onboardingCompleted,
       profile: {
-        age: profileData.age ?? null,
-        weight: profileData.weight ?? null,
-        sex: profileData.sex ?? null,
-        allergies: profileData.allergies ?? [],
-        objectives: profileData.objectives ?? [],
+        age: (profileData as any).age ?? null,
+        weight: (profileData as any).weight ?? null,
+        sex: (profileData as any).sex ?? null,
+        allergies: (profileData as any).allergies ?? [],
+        goals: sanitizedGoals,
+        objectives: sanitizedGoals,
         hasCompletedOnboarding: onboardingCompleted,
       },
       health: {
@@ -93,17 +99,43 @@ export const getPatientProfile = async (userId: string) => {
 export const updatePatientProfile = async (userId: string, profileData: Record<string, unknown>) => {
   try {
     const userRef = doc(db, 'users', userId);
+    const now = Timestamp.now();
+
+    const normalizedProfileData: Record<string, unknown> = { ...profileData };
+
+    if (
+      Object.prototype.hasOwnProperty.call(profileData, 'goals') ||
+      Object.prototype.hasOwnProperty.call(profileData, 'objectives')
+    ) {
+      const sanitizedGoals = sanitizeGoals(
+        (profileData as any).goals ?? (profileData as any).objectives ?? []
+      );
+      normalizedProfileData.goals = sanitizedGoals;
+      normalizedProfileData.objectives = sanitizedGoals;
+    }
+
     const updates: FirestoreValue = {
-      profile: profileData,
+      updatedAt: now,
       'stats.lastUpdate': new Date(),
     };
 
+    // Partial update: do NOT overwrite the whole `profile` object.
+    for (const [key, value] of Object.entries(normalizedProfileData)) {
+      updates[`profile.${key}`] = value;
+    }
+
+    // Keep V2 `goals` projection in sync when goals are updated.
+    if (Object.prototype.hasOwnProperty.call(normalizedProfileData, 'goals')) {
+      updates['goals.selected'] = (normalizedProfileData as any).goals ?? [];
+      updates['goals.updatedAt'] = now;
+    }
+
     if (Object.prototype.hasOwnProperty.call(profileData, 'hasCompletedOnboarding')) {
-      updates.hasCompletedOnboarding = Boolean(profileData.hasCompletedOnboarding);
+      updates.hasCompletedOnboarding = Boolean((profileData as any).hasCompletedOnboarding);
     }
 
     if (Object.prototype.hasOwnProperty.call(profileData, 'completedAt')) {
-      updates.completedAt = profileData.completedAt;
+      updates.completedAt = (profileData as any).completedAt;
     }
 
     await updateDoc(userRef, updates);
