@@ -271,6 +271,27 @@ export function HomeScreen() {
   }, [caloriesGoal, weeklyCalories]);
 
   const profileData = (userProfile as Record<string, unknown> | null) ?? null;
+
+  const knownUserName = useMemo(() => {
+    const profileDisplayName = (profileData as any)?.displayName;
+    if (typeof profileDisplayName === 'string' && profileDisplayName.trim()) {
+      return profileDisplayName.trim();
+    }
+
+    const nestedProfile = (profileData as any)?.profile;
+    const candidate = nestedProfile?.firstName ?? nestedProfile?.prenom ?? nestedProfile?.name;
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim();
+    }
+
+    const authDisplayName = user?.displayName;
+    if (typeof authDisplayName === 'string' && authDisplayName.trim()) {
+      return authDisplayName.trim();
+    }
+
+    return null;
+  }, [profileData, user?.displayName]);
+
   const conditions = Array.isArray((profileData as { conditions?: string[] })?.conditions)
     ? ((profileData as { conditions?: string[] }).conditions as string[])
     : Array.isArray((profileData as { profile?: { conditions?: string[] } })?.profile?.conditions)
@@ -313,7 +334,9 @@ export function HomeScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.headerTitle}>
-            <Text style={styles.greeting}>Bonjour ! 👋</Text>
+            <Text style={styles.greeting}>
+              {knownUserName ? `Bonjour, ${knownUserName} ! 👋` : 'Bonjour ! 👋'}
+            </Text>
             <Text style={styles.subtitle}>Voici votre tableau de bord santé personnalisé</Text>
           </View>
         </LinearGradient>

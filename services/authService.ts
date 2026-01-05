@@ -155,6 +155,12 @@ export const resetPassword = async (email: string): Promise<BasicResponse> => {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
   } catch (error: any) {
+    const authError = error as AuthError | undefined;
+    // Security: do not reveal whether an account exists for a given email.
+    // Firebase uses `auth/user-not-found` for unknown emails.
+    if (authError?.code === AuthErrorCodes.USER_DELETED) {
+      return { success: true };
+    }
     console.error('Error sending password reset email:', error);
     return {
       success: false,

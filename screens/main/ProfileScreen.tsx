@@ -72,9 +72,16 @@ const showComingSoon = (title: string) => {
 };
 
 export function ProfileScreen() {
-  const { user, userProfile, logout, deleteAccount } = useAuth();
+  const { user, userProfile, logout, deleteAccount, updateUserProfile } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [activeSettingsModal, setActiveSettingsModal] = useState<SettingsInfoKey | null>(null);
+
+  const [editHealthVisible, setEditHealthVisible] = useState(false);
+  const [editAge, setEditAge] = useState('');
+  const [editHeight, setEditHeight] = useState('');
+  const [editWeight, setEditWeight] = useState('');
+  const [editConditions, setEditConditions] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
 
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -123,7 +130,67 @@ export function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    showComingSoon('Modification du profil');
+    setEditAge(healthProfile.age === null || healthProfile.age === undefined ? '' : String(healthProfile.age));
+    setEditHeight(
+      healthProfile.height === null || healthProfile.height === undefined ? '' : String(healthProfile.height)
+    );
+    setEditWeight(
+      healthProfile.weight === null || healthProfile.weight === undefined ? '' : String(healthProfile.weight)
+    );
+    setEditConditions(healthProfile.conditions.join(', '));
+    setEditHealthVisible(true);
+  };
+
+  const closeEditHealth = () => {
+    if (editSaving) return;
+    setEditHealthVisible(false);
+  };
+
+  const parseNumberOrNull = (value: string, label: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const num = Number(trimmed);
+    if (!Number.isFinite(num)) {
+      throw new Error(`${label} invalide`);
+    }
+    return num;
+  };
+
+  const sanitizeCommaList = (value: string) =>
+    value
+      .split(',')
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0 && v.toLowerCase() !== 'none');
+
+  const saveHealthProfile = async () => {
+    if (editSaving) return;
+
+    try {
+      setEditSaving(true);
+
+      const age = parseNumberOrNull(editAge, 'Âge');
+      const height = parseNumberOrNull(editHeight, 'Taille');
+      const weight = parseNumberOrNull(editWeight, 'Poids');
+      const conditions = sanitizeCommaList(editConditions);
+
+      const result = await updateUserProfile({
+        age,
+        height,
+        weight,
+        conditions,
+      });
+
+      if (!result.success) {
+        Alert.alert('Erreur', result.error ?? "Impossible d'enregistrer votre profil santé.");
+        return;
+      }
+
+      setEditHealthVisible(false);
+    } catch (error: any) {
+      Alert.alert('Erreur', error?.message ?? 'Valeurs invalides');
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -238,6 +305,81 @@ export function ProfileScreen() {
               </View>
             )}
           </Card>
+
+          <Modal transparent animationType="fade" visible={editHealthVisible} onRequestClose={closeEditHealth}>
+            <Pressable style={styles.modalOverlay} onPress={closeEditHealth}>
+              <Pressable style={styles.modalCardWrapper} onPress={() => undefined}>
+                <Card style={styles.modalCard}>
+                  <View style={styles.healthModalHeader}>
+                    <View style={styles.healthModalHeaderLeft}>
+                      <View style={styles.healthModalHeaderIcon}>
+                        <Ionicons name="create-outline" size={18} color={Colors.neutral.white} />
+                      </View>
+                      <Text style={styles.healthModalTitle}>Modifier mon profil santé</Text>
+                    </View>
+                    <TouchableOpacity onPress={closeEditHealth} hitSlop={10}>
+                      <Ionicons name="close" size={18} color={Colors.neutral.white} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.healthModalBody}>
+                    <View style={styles.healthModalRow}>
+                      <View style={styles.healthModalHalf}>
+                        <Input
+                          label="Âge"
+                          placeholder="35"
+                          value={editAge}
+                          onChangeText={setEditAge}
+                          keyboardType="numeric"
+                          icon={<Ionicons name="person-outline" size={16} color={Colors.neutral.gray600} />}
+                        />
+                      </View>
+                      <View style={styles.healthModalHalf}>
+                        <Input
+                          label="Taille (cm)"
+                          placeholder="170"
+                          value={editHeight}
+                          onChangeText={setEditHeight}
+                          keyboardType="numeric"
+                          icon={<Ionicons name="resize-outline" size={16} color={Colors.neutral.gray600} />}
+                        />
+                      </View>
+                    </View>
+
+                    <Input
+                      label="Poids (kg)"
+                      placeholder="70"
+                      value={editWeight}
+                      onChangeText={setEditWeight}
+                      keyboardType="numeric"
+                      icon={<Ionicons name="fitness-outline" size={16} color={Colors.neutral.gray600} />}
+                    />
+
+                    <Input
+                      label="Pathologies"
+                      placeholder="pre-diabetes"
+                      value={editConditions}
+                      onChangeText={setEditConditions}
+                      autoCapitalize="none"
+                    />
+                    <Text style={styles.healthModalHelper}>
+                      Séparez plusieurs pathologies par des virgules.
+                    </Text>
+
+                    <View style={styles.modalActionsRow}>
+                      <Button title="Annuler" variant="outline" onPress={closeEditHealth} style={styles.modalActionButton} />
+                      <Button
+                        title={editSaving ? 'Enregistrement…' : 'Enregistrer'}
+                        onPress={saveHealthProfile}
+                        disabled={editSaving}
+                        style={styles.modalActionButton}
+                      />
+                    </View>
+                  </View>
+                </Card>
+              </Pressable>
+            </Pressable>
+          </Modal>
 
           <Card>
             <View style={styles.cardHeader}>
@@ -734,6 +876,50 @@ const styles = StyleSheet.create({
   },
   destructiveText: {
     color: Colors.status.error,
+  },
+
+  healthModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.primary.green,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+  },
+  healthModalHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flex: 1,
+  },
+  healthModalHeaderIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: `${Colors.primary.greenDark}66`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  healthModalTitle: {
+    ...Typography.h3,
+    color: Colors.neutral.white,
+  },
+  healthModalBody: {
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  healthModalRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  healthModalHalf: {
+    flex: 1,
+  },
+  healthModalHelper: {
+    ...Typography.caption,
+    color: Colors.neutral.gray600,
   },
 });
 

@@ -141,6 +141,8 @@ export const signInWithGoogleAsync = async (): Promise<GoogleAuthResult> => {
       scopes: ['openid', 'profile', 'email'],
       responseType: AuthSession.ResponseType.IdToken,
       redirectUri,
+      // Google rejects PKCE params for implicit/hybrid id_token-only responses.
+      usePKCE: false,
       extraParams: {
         nonce,
         prompt: 'select_account',
