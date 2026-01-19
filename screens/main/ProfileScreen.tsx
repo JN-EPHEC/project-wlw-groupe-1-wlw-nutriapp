@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   Alert,
@@ -72,6 +73,7 @@ const showComingSoon = (title: string) => {
 };
 
 export function ProfileScreen() {
+  const router = useRouter();
   const { user, userProfile, logout, deleteAccount, updateUserProfile } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [activeSettingsModal, setActiveSettingsModal] = useState<SettingsInfoKey | null>(null);
@@ -427,7 +429,7 @@ export function ProfileScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.doctorCard} onPress={() => showComingSoon('Mon médecin')}>
+            <TouchableOpacity style={styles.doctorCard} onPress={() => router.push('/doctor-messages')}>
               <View style={styles.doctorAvatar}>
                 <Ionicons name="person" size={24} color="#5B8DEF" />
               </View>

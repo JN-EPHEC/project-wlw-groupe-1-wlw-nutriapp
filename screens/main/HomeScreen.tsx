@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -22,20 +22,20 @@ import {
 } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { subscribeDailyEntries, toDayKey } from '@/services/firestore';
+import { RECIPES } from '@/data/recipes';
 
 type WeeklyCaloriesPoint = {
   day: string;
   value: number;
 };
 
-const recipeOfTheDay = {
-  id: '1',
-  title: 'Salade de quinoa aux légumes grillés',
-  image: 'https://images.unsplash.com/photo-1640798629665-cb874ae363d2?w=800',
-  time: 25,
-  calories: 380,
-  tags: ['Compatible diabète', 'Riche en fibres', 'Végétarien'],
-};
+function getRecipeOfTheDay() {
+  // Calcul basé sur la date pour que la recette change chaque jour
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+  const recipeIndex = dayOfYear % RECIPES.length;
+  return RECIPES[recipeIndex] || RECIPES[0];
+}
 
 const DAY_LABELS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'] as const;
 
@@ -143,7 +143,76 @@ export function HomeScreen() {
   const router = useRouter();
   const { user, userProfile, updateUserProfile } = useAuth();
 
-  const caloriesGoal = 2000;
+  // Calculate daily calorie goal based on BMI and health goals
+  const caloriesGoal = useMemo(() => {
+    const profile = (userProfile ?? {}) as Record<string, unknown>;
+    const nestedProfile = 
+      typeof profile.profile === 'object' && profile.profile !== null
+        ? (profile.profile as Record<string, unknown>)
+        : {};
+
+    const weight = Number(nestedProfile.weight ?? profile.weight) || 70;
+    const height = Number(nestedProfile.height ?? profile.height) || 170;
+    const age = Number(nestedProfile.age ?? profile.age) || 30;
+    const gender = String(nestedProfile.gender ?? profile.gender ?? 'M').toLowerCase().charAt(0);
+    const activityLevel = String(nestedProfile.activityLevel ?? profile.activityLevel ?? 'moderate');
+    
+    // Get health goals
+    const goalsData = (profile as any)?.goals;
+    const goalIds: string[] = Array.isArray(goalsData?.selected) 
+      ? goalsData.selected 
+      : Array.isArray(goalsData) 
+      ? goalsData 
+      : [];
+
+    // Calculate BMR using Mifflin-St Jeor equation
+    let bmr: number;
+    const heightCm = height;
+    const weightKg = weight;
+    
+    if (gender === 'm') {
+      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    } else {
+      bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+    }
+
+    // Apply activity factor
+    let tdee = bmr;
+    switch (activityLevel) {
+      case 'sedentary':
+        tdee = bmr * 1.2;
+        break;
+      case 'light':
+        tdee = bmr * 1.375;
+        break;
+      case 'moderate':
+        tdee = bmr * 1.55;
+        break;
+      case 'active':
+        tdee = bmr * 1.725;
+        break;
+      case 'very-active':
+        tdee = bmr * 1.9;
+        break;
+      default:
+        tdee = bmr * 1.55;
+    }
+
+    // Adjust based on health goals
+    let calorieTarget = Math.round(tdee);
+
+    if (goalIds.includes('lose-weight')) {
+      // 15% caloric deficit for weight loss
+      calorieTarget = Math.round(tdee * 0.85);
+    } else if (goalIds.includes('gain-weight')) {
+      // 15% caloric surplus for weight gain
+      calorieTarget = Math.round(tdee * 1.15);
+    }
+    // For maintain-weight or stabilize-glucose, use TDEE as is
+
+    // Minimum 1200 kcal for safety, maximum reasonable cap
+    return Math.max(1200, Math.min(calorieTarget, 3500));
+  }, [userProfile]);
 
   const weekDays = useMemo(() => {
     const today = new Date();
@@ -331,6 +400,12 @@ export function HomeScreen() {
 
   const hasHealthInfo = conditions.length > 0 && conditions[0] !== 'none';
 
+  const recipeOfTheDay = useMemo(() => getRecipeOfTheDay(), []);
+
+  const navigateToRecipe = (recipeId: string) => {
+    router.push({ pathname: '/(tabs)/recipes/[id]', params: { id: recipeId } });
+  };
+
   const handleNavigate = (route: 'Profile' | 'Recipes' | 'Assistant' | 'Health' | 'Home') => {
     switch (route) {
       case 'Profile':
@@ -501,7 +576,7 @@ export function HomeScreen() {
 
               <Button
                 title="Voir la recette"
-                onPress={() => handleNavigate('Recipes')}
+                onPress={() => navigateToRecipe(recipeOfTheDay.id)}
                 icon={<Ionicons name="arrow-forward" size={20} color={Colors.neutral.white} />}
               />
             </View>

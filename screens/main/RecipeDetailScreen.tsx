@@ -43,7 +43,17 @@ export function RecipeDetailScreen() {
           style={styles.gradient}
         />
 
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => {
+            // Try to go back in history, if that doesn't work, go to recipes list
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(tabs)/recipes');
+            }
+          }}
+        >
           <Ionicons name="arrow-back" size={20} color={Colors.neutral.gray900} />
         </TouchableOpacity>
 
