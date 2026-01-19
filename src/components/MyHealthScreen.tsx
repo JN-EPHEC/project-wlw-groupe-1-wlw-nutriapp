@@ -1,9 +1,8 @@
+import { ArrowUpRight, Calendar, MessageCircle, TrendingUp, User } from 'lucide-react';
 import { useState } from 'react';
-import { Heart, Activity, Droplet, TrendingUp, Calendar, User, MessageCircle, ArrowUpRight } from 'lucide-react';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 import { Card } from './ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface UserProfile {
   conditions?: string[];
@@ -227,16 +226,20 @@ export default function MyHealthScreen({ profile }: MyHealthScreenProps) {
           {/* Chart */}
           <div className="h-72 mb-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={getChartData()}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <LineChart 
+                data={getChartData()}
+                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                 <XAxis 
                   dataKey="date" 
                   stroke="#9CA3AF"
-                  style={{ fontSize: '12px' }}
+                  tick={{ fontSize: 12, fill: '#6B7280', dy: 5 }}
                 />
                 <YAxis 
                   stroke="#9CA3AF"
-                  style={{ fontSize: '12px' }}
+                  tick={{ fontSize: 12, fill: '#6B7280', dx: -5 }}
+                  width={35}
                 />
                 <Tooltip 
                   contentStyle={{

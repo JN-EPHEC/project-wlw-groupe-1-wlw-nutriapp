@@ -22,7 +22,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '1',
     title: 'Salade Keto complète',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?w=800',
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800',
     time: 15,
     calories: 370,
     tags: ['Compatible diabète', 'Sans gluten', 'Faible glucides'],
@@ -53,7 +53,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '2',
     title: 'Poulet grillé & Légumes',
-    image: 'https://images.unsplash.com/photo-1682423187670-4817da9a1b23?w=800',
+    image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800',
     time: 35,
     calories: 450,
     tags: ['Riche en protéines', 'Sans lactose', 'Faible sel'],
@@ -84,7 +84,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '3',
     title: 'Porridge aux baies',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?w=800',
+    image: 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 10,
     calories: 320,
     tags: ['Végétarien', 'Riche en fibres', 'Sans gluten'],
@@ -115,7 +115,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '4',
     title: 'Saumon & Légumes vapeur',
-    image: 'https://images.unsplash.com/photo-1746783840967-738ea85b0f25?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 25,
     calories: 380,
     tags: ['Compatible diabète', 'Riche en Oméga-3', 'Hypertension'],
@@ -140,7 +140,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '5',
     title: 'Smoothie vert détox',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 5,
     calories: 180,
     tags: ['Végétarien', 'Antioxydants', 'Sans lactose'],
@@ -157,7 +157,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '6',
     title: 'Curry de lentilles corail',
-    image: 'https://images.unsplash.com/photo-1629032355269-bde5c5da4ab2?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1712678664930-ef7051cd1b31?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 35,
     calories: 360,
     tags: ['Végétarien', 'Sans gluten', 'Riche en protéines'],
@@ -174,7 +174,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '7',
     title: 'Omelette aux champignons & fines herbes',
-    image: 'https://images.unsplash.com/photo-1612872087720-bb876e3a4ae4?w=800',
+    image: 'https://images.unsplash.com/photo-1755531567087-b1169c42aa3c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 12,
     calories: 290,
     tags: ['Faible glucides', 'Riche en protéines', 'Petit déjeuner'],
@@ -196,7 +196,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '8',
     title: 'Buddha bowl légumineuses & quinoa',
-    image: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
     time: 30,
     calories: 420,
     tags: ['Compatible diabète', 'Riche en fibres', 'Sans lactose'],
@@ -225,7 +225,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '9',
     title: 'Soupe de tomates rôties & basilic',
-    image: 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800',
+    image: 'https://img.freepik.com/photos-gratuite/soupe-tomates-maison-dans-cuisine_53876-146583.jpg',
     time: 40,
     calories: 210,
     tags: ['Faible sodium', 'Sans lactose', 'Immunité'],
@@ -247,7 +247,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '10',
     title: 'Parfait yaourt grec & fruits rouges',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
+    image: 'https://img.freepik.com/photos-gratuite/verres-remplis-concept-mode-vie-alimentaire-bio-fruits_23-2148650267.jpg',
     time: 8,
     calories: 250,
     tags: ['Riche en probiotiques', 'Sans gluten', 'Collation rapide'],
@@ -264,7 +264,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '11',
     title: 'Tacos de poisson grillé & salsa mangue',
-    image: 'https://images.unsplash.com/photo-1548943487-a2e4e43b4853?w=800',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800',
     time: 25,
     calories: 410,
     tags: ['Riche en Oméga-3', 'Sans lactose', 'Équilibre glucidique'],
@@ -286,7 +286,7 @@ export const RECIPES: Recipe[] = [
   {
     id: '12',
     title: 'Bol énergétique cacao & banane',
-    image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800',
+    image: 'https://images.unsplash.com/photo-1576975911414-2c8f982ab2f1?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     time: 10,
     calories: 330,
     tags: ['Sportif', 'Riche en magnésium', 'Sans lactose'],

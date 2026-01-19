@@ -39,6 +39,13 @@ const recipeOfTheDay = {
 
 const DAY_LABELS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'] as const;
 
+// Fonction pour capitaliser la première lettre
+function capitalizeFirstLetter(str: string): string {
+  if (!str || typeof str !== 'string') return str;
+  const trimmed = str.trim();
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+}
+
 function getUserGoals(userProfile: Record<string, unknown> | null): GoalId[] {
   const flat = userProfile ?? {};
   const nested =
@@ -273,24 +280,48 @@ export function HomeScreen() {
   const profileData = (userProfile as Record<string, unknown> | null) ?? null;
 
   const knownUserName = useMemo(() => {
+    // Priority 1: Try firstName from top-level profile (from signup form)
+    const profileFirstName = (profileData as any)?.firstName;
+    if (typeof profileFirstName === 'string' && profileFirstName.trim()) {
+      return capitalizeFirstLetter(profileFirstName);
+    }
+
+    // Priority 2: Try firstName from nested profile (from signup form)
+    const nestedProfile = (profileData as any)?.profile;
+    const nestedFirstName = nestedProfile?.firstName;
+    if (typeof nestedFirstName === 'string' && nestedFirstName.trim()) {
+      return capitalizeFirstLetter(nestedFirstName);
+    }
+
+    // Priority 3: Try displayName (from auth or profile)
     const profileDisplayName = (profileData as any)?.displayName;
     if (typeof profileDisplayName === 'string' && profileDisplayName.trim()) {
-      return profileDisplayName.trim();
+      return capitalizeFirstLetter(profileDisplayName);
     }
 
-    const nestedProfile = (profileData as any)?.profile;
-    const candidate = nestedProfile?.firstName ?? nestedProfile?.prenom ?? nestedProfile?.name;
+    // Priority 4: Try other name fields in nested profile (prenom, name)
+    const candidate = nestedProfile?.prenom ?? nestedProfile?.name;
     if (typeof candidate === 'string' && candidate.trim()) {
-      return candidate.trim();
+      return capitalizeFirstLetter(candidate);
     }
 
+    // Priority 5: Try Firebase auth displayName
     const authDisplayName = user?.displayName;
     if (typeof authDisplayName === 'string' && authDisplayName.trim()) {
-      return authDisplayName.trim();
+      return capitalizeFirstLetter(authDisplayName);
+    }
+
+    // Priority 6: Extract firstName from email as fallback
+    const email = user?.email;
+    if (typeof email === 'string' && email.trim()) {
+      const firstName = email.split('@')[0].split('.')[0];
+      if (firstName.trim()) {
+        return capitalizeFirstLetter(firstName);
+      }
     }
 
     return null;
-  }, [profileData, user?.displayName]);
+  }, [profileData, user?.displayName, user?.email]);
 
   const conditions = Array.isArray((profileData as { conditions?: string[] })?.conditions)
     ? ((profileData as { conditions?: string[] }).conditions as string[])

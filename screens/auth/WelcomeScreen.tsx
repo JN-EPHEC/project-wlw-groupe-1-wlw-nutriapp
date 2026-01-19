@@ -37,6 +37,8 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [rgpdAccepted, setRgpdAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -51,6 +53,8 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
     setMode((prev) => (prev === 'signup' ? 'login' : 'signup'));
     setPassword('');
     setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
   };
 
   const validateEmail = (value: string) => {
@@ -89,7 +93,11 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
     setLoading(true);
 
     const result = isSignup
-      ? await signup(email.trim(), password, { email: email.trim() })
+      ? await signup(email.trim(), password, { 
+          email: email.trim(),
+          firstName: firstName.trim() || undefined,
+          lastName: lastName.trim() || undefined,
+        })
       : await login(email.trim(), password);
 
     setLoading(false);
@@ -140,6 +148,28 @@ export function WelcomeScreen({ initialMode = 'login' }: WelcomeScreenProps) {
             keyboardType="email-address"
             icon={<Ionicons name="mail-outline" size={20} color={Colors.neutral.gray600} />}
           />
+
+          {isSignup && (
+            <>
+              <Input
+                label="Prénom (facultatif)"
+                placeholder="Jean"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+                icon={<Ionicons name="person-outline" size={20} color={Colors.neutral.gray600} />}
+              />
+
+              <Input
+                label="Nom (facultatif)"
+                placeholder="Dupont"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+                icon={<Ionicons name="person-outline" size={20} color={Colors.neutral.gray600} />}
+              />
+            </>
+          )}
 
           <Input
             label="Mot de passe"

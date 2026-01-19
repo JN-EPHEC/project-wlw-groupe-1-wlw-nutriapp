@@ -20,7 +20,7 @@ export const recipes: Recipe[] = [
   {
     id: '1',
     title: 'Salade Keto complète',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800',
     time: 15,
     calories: 370,
     tags: ['Compatible diabète', 'Sans gluten', 'Faible glucides'],
@@ -52,7 +52,7 @@ export const recipes: Recipe[] = [
   {
     id: '2',
     title: 'Poulet grillé & Légumes',
-    image: 'https://images.unsplash.com/photo-1682423187670-4817da9a1b23?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800',
     time: 35,
     calories: 450,
     tags: ['Riche en protéines', 'Sans lactose', 'Faible sel'],
@@ -84,7 +84,7 @@ export const recipes: Recipe[] = [
   {
     id: '3',
     title: 'Porridge aux baies',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1515521396207-4b3490dbead4?w=800',
     time: 10,
     calories: 320,
     tags: ['Végétarien', 'Riche en fibres', 'Sans gluten'],
@@ -114,7 +114,7 @@ export const recipes: Recipe[] = [
   {
     id: '4',
     title: 'Saumon & Légumes vapeur',
-    image: 'https://images.unsplash.com/photo-1746783840967-738ea85b0f25?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1580959375944-abd7e991eea9?w=800',
     time: 25,
     calories: 380,
     tags: ['Compatible diabète', 'Riche en Oméga-3', 'Hypertension'],
@@ -139,7 +139,7 @@ export const recipes: Recipe[] = [
   {
     id: '5',
     title: 'Smoothie vert détox',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800',
     time: 5,
     calories: 180,
     tags: ['Végétarien', 'Antioxydants', 'Sans lactose'],
@@ -156,7 +156,7 @@ export const recipes: Recipe[] = [
   {
     id: '6',
     title: 'Curry de lentilles corail',
-    image: 'https://images.unsplash.com/photo-1629032355269-bde5c5da4ab2?auto=format&fit=crop&w=1080&q=80',
+    image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e4e87?w=800',
     time: 35,
     calories: 360,
     tags: ['Végétarien', 'Sans gluten', 'Riche en protéines'],

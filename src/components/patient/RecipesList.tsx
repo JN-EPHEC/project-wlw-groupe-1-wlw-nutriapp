@@ -1,12 +1,10 @@
+import { Apple, Beef, Filter, Heart, Salad, Search, Star, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
-import { Search, Heart, Clock, Flame, Filter, UtensilsCrossed, Apple, Beef, Salad, Users, Star, ChevronLeft, ChevronRight, Menu, User as UserIcon, Plus, ArrowDown } from 'lucide-react';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
-import RecipeDetail from './RecipeDetail';
 import FilterPanel, { FilterState } from './FilterPanel';
-import Logo from '../Logo';
+import RecipeDetail from './RecipeDetail';
 
 interface UserProfile {
   conditions?: string[];
@@ -48,7 +46,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '1',
     title: 'Salade Keto complète',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc2FsYWQlMjBib3dsfGVufDF8fHx8MTc2Mjc2MTM2M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&w=500&q=80',
     time: 15,
     calories: 370,
     tags: ['Compatible diabète', 'Sans gluten', 'Faible glucides'],
@@ -80,7 +78,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '2',
     title: 'Poulet grillé & Légumes',
-    image: 'https://images.unsplash.com/photo-1682423187670-4817da9a1b23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmlsbGVkJTIwY2hpY2tlbiUyMG1lYWx8ZW58MXx8fHwxNzYyNjc4ODIwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&w=500&q=80',
     time: 35,
     calories: 450,
     tags: ['Riche en protéines', 'Sans lactose', 'Faible sel'],
@@ -112,7 +110,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '3',
     title: 'Porridge aux baies',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjBvYXRtZWFsJTIwYmVycmllc3xlbnwxfHx8fDE3NjI3NzQ5MDh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1515521396207-4b3490dbead4?auto=format&w=500&q=80',
     time: 10,
     calories: 320,
     tags: ['Végétarien', 'Riche en fibres', 'Sans gluten'],
@@ -144,7 +142,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '4',
     title: 'Saumon & Légumes vapeur',
-    image: 'https://images.unsplash.com/photo-1746783840967-738ea85b0f25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXNoJTIwdmVnZXRhYmxlcyUyMGRpbm5lcnxlbnwxfHx8fDE3NjI3ODM1NDF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&w=500&q=80',
     time: 25,
     calories: 380,
     tags: ['Compatible diabète', 'Riche en Oméga-3', 'Hypertension'],
@@ -176,7 +174,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '5',
     title: 'Soupe minestrone maison',
-    image: 'https://images.unsplash.com/photo-1629032355269-bde5c5da4ab2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc291cCUyMGJvd2x8ZW58MXx8fHwxNzYyNzI1ODUyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1547592166-7aae4d755744?auto=format&w=500&q=80',
     time: 40,
     calories: 280,
     tags: ['Végétarien', 'Riche en fibres', 'Faible calories'],
@@ -211,7 +209,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '6',
     title: 'Pâtes primavera légères',
-    image: 'https://images.unsplash.com/photo-1628262815115-08c50c64e73c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZWdldGFyaWFuJTIwcGFzdGF8ZW58MXx8fHwxNzYyNzgzNTQyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&w=500&q=80',
     time: 20,
     calories: 420,
     tags: ['Végétarien', 'Faible sel', 'Méditerranéen'],
@@ -245,7 +243,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '7',
     title: 'Tartine avocat & œuf poché',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc2FsYWQlMjBib3dsfGVufDF8fHx8MTc2Mjc2MTM2M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1578328847493-a4f2e0e23e85?auto=format&w=500&q=80',
     time: 12,
     calories: 340,
     tags: ['Végétarien', 'Riche en protéines', 'Sans lactose'],
@@ -278,7 +276,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '8',
     title: 'Bowl buddha végétarien',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc2FsYWQlMjBib3dsfGVufDF8fHx8MTc2Mjc2MTM2M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&w=500&q=80',
     time: 30,
     calories: 480,
     tags: ['Végétarien', 'Sans gluten', 'Riche en fibres'],
@@ -312,7 +310,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '9',
     title: 'Smoothie vert détox',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjBvYXRtZWFsJTIwYmVycmllc3xlbnwxfHx8fDE3NjI3NzQ5MDh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&w=500&q=80',
     time: 5,
     calories: 180,
     tags: ['Végétarien', 'Antioxydants', 'Sans lactose'],
@@ -345,7 +343,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '10',
     title: 'Curry de lentilles corail',
-    image: 'https://images.unsplash.com/photo-1629032355269-bde5c5da4ab2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc291cCUyMGJvd2x8ZW58MXx8fHwxNzYyNzI1ODUyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e4e87?auto=format&w=500&q=80',
     time: 35,
     calories: 360,
     tags: ['Végétarien', 'Sans gluten', 'Riche en protéines'],
@@ -380,7 +378,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '11',
     title: 'Salade grecque classique',
-    image: 'https://images.unsplash.com/photo-1649531794884-b8bb1de72e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc2FsYWQlMjBib3dsfGVufDF8fHx8MTc2Mjc2MTM2M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1599599810694-b3ba41f50213?auto=format&w=500&q=80',
     time: 15,
     calories: 320,
     tags: ['Végétarien', 'Sans gluten', 'Méditerranéen'],
@@ -415,7 +413,7 @@ const mockRecipes: Recipe[] = [
   {
     id: '12',
     title: 'Pancakes protéinés',
-    image: 'https://images.unsplash.com/photo-1602682822546-09bc5623461e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjBvYXRtZWFsJTIwYmVycmllc3xlbnwxfHx8fDE3NjI3NzQ5MDh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    image: 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=1080&q=80',
     time: 20,
     calories: 380,
     tags: ['Riche en protéines', 'Sans lactose', 'Végétarien'],

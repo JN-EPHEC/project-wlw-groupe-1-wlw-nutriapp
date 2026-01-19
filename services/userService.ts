@@ -50,6 +50,8 @@ export const createPatientProfile = async (userId: string, profileData: Record<s
 
       email: (profileData as any).email ?? null,
       displayName: (profileData as any).displayName ?? null,
+      firstName: (profileData as any).firstName ?? null,
+      lastName: (profileData as any).lastName ?? null,
       hasCompletedOnboarding: onboardingCompleted,
       profile: {
         age: (profileData as any).age ?? null,
@@ -59,6 +61,8 @@ export const createPatientProfile = async (userId: string, profileData: Record<s
         goals: sanitizedGoals,
         objectives: sanitizedGoals,
         hasCompletedOnboarding: onboardingCompleted,
+        firstName: (profileData as any).firstName ?? null,
+        lastName: (profileData as any).lastName ?? null,
       },
       health: {
         glycemia: [],

@@ -77,6 +77,8 @@ export function ProfileScreen() {
   const [activeSettingsModal, setActiveSettingsModal] = useState<SettingsInfoKey | null>(null);
 
   const [editHealthVisible, setEditHealthVisible] = useState(false);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
   const [editAge, setEditAge] = useState('');
   const [editHeight, setEditHeight] = useState('');
   const [editWeight, setEditWeight] = useState('');
@@ -130,6 +132,8 @@ export function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
+    setEditFirstName(userProfile?.firstName ? String(userProfile.firstName) : '');
+    setEditLastName(userProfile?.lastName ? String(userProfile.lastName) : '');
     setEditAge(healthProfile.age === null || healthProfile.age === undefined ? '' : String(healthProfile.age));
     setEditHeight(
       healthProfile.height === null || healthProfile.height === undefined ? '' : String(healthProfile.height)
@@ -168,12 +172,16 @@ export function ProfileScreen() {
     try {
       setEditSaving(true);
 
+      const firstName = editFirstName.trim() || null;
+      const lastName = editLastName.trim() || null;
       const age = parseNumberOrNull(editAge, 'Âge');
       const height = parseNumberOrNull(editHeight, 'Taille');
       const weight = parseNumberOrNull(editWeight, 'Poids');
       const conditions = sanitizeCommaList(editConditions);
 
       const result = await updateUserProfile({
+        firstName,
+        lastName,
         age,
         height,
         weight,
@@ -248,7 +256,11 @@ export function ProfileScreen() {
           <View style={styles.avatar}>
             <Ionicons name="person" size={40} color={Colors.primary.green} />
           </View>
-          <Text style={styles.name}>Mon profil</Text>
+          <Text style={styles.name}>
+            {userProfile?.firstName || userProfile?.lastName 
+              ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim()
+              : 'Mon profil'}
+          </Text>
           <Text style={styles.email}>{user?.email ?? 'Utilisateur NutriAdapt'}</Text>
         </View>
 
@@ -323,6 +335,27 @@ export function ProfileScreen() {
                   </View>
 
                   <View style={styles.healthModalBody}>
+                    <View style={styles.healthModalRow}>
+                      <View style={styles.healthModalHalf}>
+                        <Input
+                          label="Prénom"
+                          placeholder="Jean"
+                          value={editFirstName}
+                          onChangeText={setEditFirstName}
+                          icon={<Ionicons name="person-outline" size={16} color={Colors.neutral.gray600} />}
+                        />
+                      </View>
+                      <View style={styles.healthModalHalf}>
+                        <Input
+                          label="Nom"
+                          placeholder="Dupont"
+                          value={editLastName}
+                          onChangeText={setEditLastName}
+                          icon={<Ionicons name="person-outline" size={16} color={Colors.neutral.gray600} />}
+                        />
+                      </View>
+                    </View>
+
                     <View style={styles.healthModalRow}>
                       <View style={styles.healthModalHalf}>
                         <Input

@@ -1,19 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Timestamp } from 'firebase/firestore';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    Alert,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -549,29 +549,15 @@ export function HealthScreen() {
           <Card>
             <View style={styles.chartHeader}>
               <Text style={styles.chartTitle}>{chartConfig.title}</Text>
-              {selectedMetric === 'glucose' ? (
-                <View style={styles.chartLegend}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: Colors.primary.green }]} />
-                    <Text style={styles.legendText}>Normal</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: Colors.status.error }]} />
-                    <Text style={styles.legendText}>Anormal</Text>
-                  </View>
-                </View>
-              ) : null}
             </View>
 
             <View style={styles.chart}>
               {selectedMetric === 'glucose' ? (
                 <>
                   <View style={styles.referenceLine}>
-                    <Text style={styles.referenceText}>140</Text>
                     <View style={styles.referenceLineDashed} />
                   </View>
                   <View style={[styles.referenceLine, { top: chartHeight / 2 }]}>
-                    <Text style={styles.referenceText}>100</Text>
                     <View style={styles.referenceLineDashed} />
                   </View>
                 </>
@@ -823,12 +809,14 @@ const styles = StyleSheet.create({
     color: Colors.neutral.gray600,
   },
   chart: {
-    height: 180,
+    height: 280,
     position: 'relative',
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
   },
   referenceLine: {
     position: 'absolute',
-    top: 20,
+    top: 30,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -838,7 +826,9 @@ const styles = StyleSheet.create({
   referenceText: {
     ...Typography.body2,
     color: Colors.neutral.gray600,
-    width: 32,
+    width: 40,
+    fontSize: 10,
+    fontWeight: '600',
   },
   referenceLineDashed: {
     flex: 1,
@@ -852,28 +842,31 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-around',
     height: chartHeight,
-    paddingTop: 20,
+    paddingTop: 30,
+    paddingBottom: 10,
+    paddingHorizontal: Spacing.sm,
   },
   dataPoint: {
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.xs,
     flex: 1,
   },
   dataValue: {
     ...Typography.body2,
     color: Colors.neutral.gray600,
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 10,
+    fontWeight: '600',
   },
   dataBar: {
-    width: '80%',
+    width: '75%',
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
   },
   dataLabel: {
     ...Typography.body2,
-    color: Colors.neutral.gray600,
-    fontSize: 11,
+    color: Colors.neutral.gray700,
+    fontSize: 12,
+    fontWeight: '600',
   },
   statsHeader: {
     flexDirection: 'row',
